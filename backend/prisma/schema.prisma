@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  nama         String
+  email        String    @unique
+  passwordHash String
+  role         String    @default("pelapor")
+  createdAt    DateTime  @default(now())
+  reports      Report[]
+  history      ReportStatusHistory[]
+}
+
+model Category {
+  id           Int       @id @default(autoincrement())
+  namaKategori String
+  reports      Report[]
+}
+
+model Report {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  judul       String
+  deskripsi   String
+  kategoriId  Int
+  kategori    Category  @relation(fields: [kategoriId], references: [id])
+  lokasi      String?
+  fotoUrl     String?
+  status      String    @default("baru")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  history     ReportStatusHistory[]
+}
+
+model ReportStatusHistory {
+  id         Int      @id @default(autoincrement())
+  reportId   Int
+  report     Report   @relation(fields: [reportId], references: [id])
+  status     String
+  catatan    String?
+  changedBy  Int
+  changer    User     @relation(fields: [changedBy], references: [id])
+  changedAt  DateTime @default(now())
+}
